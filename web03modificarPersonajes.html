@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modificar Personaje</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css" />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Navbar</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a
+                class="nav-link active"
+                aria-current="page"
+                href="web01paginaPrincipal.html"
+                >Home</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="web02nuevoPersonaje.html"
+                >Nuevo Personaje</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="web03modificarPersonajes.html"
+                >Modificar personajes</a
+              >
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Series
+              </a>
+              <ul class="dropdown-menu" id="liSeries"></ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <form>
+      <label>Serie</label>
+      <select id="selectSerie"></select>
+      <br />
+      <label>Personaje</label>
+      <select id="selectPersonaje"></select>
+      <button id="botonModificar">Modificar</button>
+    </form>
+    <div id="containerInfoSerie"></div>
+    <div id="containerInfoPersonaje"></div>
+
+    <script src="./js/jquery-3.7.1.min.js"></script>
+    <script src="../js/bootstrap.bundle.min.js"></script>
+    <script>
+      var urlSeries = "https://apiseriespersonajes.azurewebsites.net/";
+      $(document).ready(function () {
+        loadSeries();
+
+        var requestS = "api/Series";
+        $.ajax({
+          url: urlSeries + requestS,
+          method: "GET",
+          success: function (data) {
+            console.log("Leyendo servicio");
+            $.each(data, function (index, serie) {
+              var option = $("<option>", {
+                text: serie.nombre,
+                value: serie.idSerie,
+              });
+              $("#selectSerie").append(option);
+
+            });
+          },
+        });
+
+        var requestP = "api/Personajes";
+        $.ajax({
+          url: urlSeries + requestP,
+          method: "GET",
+          success: function (data) {
+            console.log("Leyendo servicio");
+            $.each(data, function (index, personaje) {
+              var option = $("<option>", {
+                text: personaje.nombre,
+                value: personaje.idPersonaje,
+              });
+              $("#selectPersonaje").append(option);
+
+            });
+          },
+        });
+
+        $("#selectSerie").on("change", function () {
+          var idSerie = $(this).val();
+            cargarSerie(idSerie);
+          console.log(idSerie);
+        });
+
+        $("#selectPersonaje").on("change", function () {
+          var  idPersonaje = $(this).val();
+          cargarPersonaje(idPersonaje)
+          console.log(idPersonaje)
+        });
+      });
+
+      function loadSeries() {
+        var request = "api/Series";
+        $.getJSON(urlSeries + request, function (data) {
+          var html = "";
+          $.each(data, function (index, serie) {
+            html += "<li>";
+            html +=
+              "<a class='dropdown-item' href='web04detallesSerie.html?idSerie=" +
+              serie.idSerie +
+              "'>" +
+              serie.nombre +
+              "</a>";
+            html += "</li>";
+          });
+          $("#liSeries").html(html);
+        });
+      }
+
+      $("#botonModificar").click(function (e) {
+        e.preventDefault();
+        var idSerie = parseInt($("#selectSerie").val());
+        var idPersonaje = parseInt($("#selectPersonaje").val());
+
+        var request = "api/Personajes/"+ idPersonaje + "/" + idSerie;
+
+        $.ajax({
+          url: urlSeries + request,
+          type: "PUT",
+          contentType: "application/json",
+          success: function () {
+            console.log("Modificado");
+            window.location.href = "web05personajes.html?idSerie=" + idSerie;
+          },
+        });
+      });
+
+     function cargarSerie(idSerie){
+        var request= "api/Series/" + idSerie
+            $.getJSON(urlSeries + request, function(data){
+                var html="";
+                html+= "<img src='" + data.imagen + "'></img>"
+                html+= "<h1>" + data.nombre + "</h1>"
+                $("#containerInfoSerie").html(html)
+            })
+     }
+
+     function cargarPersonaje(idPersonaje){
+        var request= "api/Personajes/" + idPersonaje
+            $.getJSON(urlSeries + request, function(data){
+                var html="";
+                html+= "<img src='" + data.imagen + "'></img>"
+                html+= "<h1>" + data.nombre + "</h1>"
+                $("#containerInfoPersonaje").html(html)
+            })
+     }
+    </script>
+  </body>
+</html>
